@@ -3,9 +3,6 @@ export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
     ssr: false,
-    modules: [
-        '@nuxt/ui',
-        '@pinia/nuxt',
-    ],
+    modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxt/image'],
     css: ['~/assets/css/main.css']
 })

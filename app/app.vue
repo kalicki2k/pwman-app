@@ -1,7 +1,11 @@
+<script setup lang="ts">
+
+</script>
 <template>
   <UApp>
-    <NuxtPage />
+    <NuxtLoadingIndicator color="var(--ui-primary)" />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </UApp>
 </template>
-<script setup lang="ts">
-</script>
