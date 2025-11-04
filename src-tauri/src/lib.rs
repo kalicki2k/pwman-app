@@ -1,7 +1,18 @@
+mod state;
+mod commands;
+
+use tauri::Manager;
+use state::SyncState;
+use crate::commands::{start_sync, stop_sync};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
-    .setup(|app| {
+    .plugin(tauri_plugin_shell::init())
+    .manage(SyncState {
+      child: std::sync::Mutex::new(None),
+    })
+    .setup(move | app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
           tauri_plugin_log::Builder::default()
@@ -11,6 +22,19 @@ pub fn run() {
       }
       Ok(())
     })
+    .on_window_event(|window, event| {
+      if let tauri::WindowEvent::CloseRequested { .. } = event {
+        let state = window.state::<SyncState>();
+        let mut guard = state.child.lock().unwrap();
+        if let Some(child) = guard.take() {
+          let _ = child.kill();
+        }
+      }
+    })
+    .invoke_handler(tauri::generate_handler![
+            start_sync,
+            stop_sync
+        ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
