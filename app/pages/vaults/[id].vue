@@ -3,13 +3,16 @@
 import { computed, onMounted, watch, watchEffect, ref } from 'vue'
 import { useVaults } from '~/stores/vaults'
 import { useEntries } from '~/stores/entries'
-import { LazyEntriesEntryAddModal } from "#components";
-import EntryList from "~/components/entries/EntryList.vue";
-import EntryDetails from "~/components/entries/EntryDetails.vue";
+import { LazyEntriesEntryAddModal } from '#components';
+import { useSyncApi } from '~/composables/useSyncApi';
+import EntryList from '~/components/entries/EntryList.vue';
+import EntryDetails from '~/components/entries/EntryDetails.vue';
+
 
 const route = useRoute();
 const vaultStore = useVaults();
 const entryStore = useEntries();
+const { pull } = useSyncApi();
 
 const toast = useToast();
 const overlay = useOverlay();
@@ -39,9 +42,20 @@ async function open() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   vaultStore.seed(); entryStore.seed();
   if (typeof route.params.id === 'string') vaultStore.selectVault(route.params.id);
+
+  console.log(1, vaultStore.current?.id);
+
+  if (vaultStore.current?.id) {
+    try {
+      const result = await pull(vaultStore.current.id, 0, 50);
+      console.log('Pulled events:', result);
+    } catch (e) {
+      console.error('Pull failed', e);
+    }
+  }
 });
 
 watchEffect(() => {
